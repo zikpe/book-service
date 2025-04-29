@@ -1,4 +1,4 @@
-package com.bhattaditya2.book_service.dto;
+package com.bhattaditya2.book_service.payload;
 
 import com.bhattaditya2.book_service.entity.Author;
 import com.bhattaditya2.book_service.entity.Book;

@@ -1,6 +1,6 @@
 package com.bhattaditya2.book_service.controller;
 
-import com.bhattaditya2.book_service.dto.BookResponse;
+import com.bhattaditya2.book_service.payload.BookResponse;
 import com.bhattaditya2.book_service.entity.Book;
 import com.bhattaditya2.book_service.service.BookService;
 import org.springframework.http.HttpStatus;
