@@ -1,9 +1,17 @@
 package com.bhattaditya2.book_service.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+@Setter
+@Getter
 @Entity
 @Table(name = "books")
+@AllArgsConstructor
+@NoArgsConstructor
 public class Book {
 
     @Id
@@ -14,47 +22,6 @@ public class Book {
 
     private String genre;
 
-    private Long authorId;  // 🔥 Only save Author's ID, no relation mapping here (Microservice style)
+    private Long authorId;
 
-    public Book() {
-    }
-
-    public Book(Long id, String title, String genre, Long authorId) {
-        this.id = id;
-        this.title = title;
-        this.genre = genre;
-        this.authorId = authorId;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public String getGenre() {
-        return genre;
-    }
-
-    public void setGenre(String genre) {
-        this.genre = genre;
-    }
-
-    public Long getAuthorId() {
-        return authorId;
-    }
-
-    public void setAuthorId(Long authorId) {
-        this.authorId = authorId;
-    }
 }
