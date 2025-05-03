@@ -20,4 +20,8 @@ eureka:
 
 logging:
   level:
-    org.springframework.web: DEBUG
+    org.springframework.web.client.RestTemplate: INFO
+    org.springframework.web.servlet.DispatcherServlet: INFO
+    com.netflix.discovery: WARN
+    com.netflix.eureka: WARN
+    org.springframework.cloud.netflix.eureka: WARN

@@ -9,10 +9,10 @@ public interface BookService {
 
     BookResponse fetchBookDetails(Long id);
 
-    Book createBook(Book book);
+    BookResponse createBook(Book book);
 
     List<BookResponse> getAllBooks();
 
-    Book updateBook(Long id, Book book);
+    BookResponse updateBook(Long id, Book book);
     void deleteBook(Long id);
 }

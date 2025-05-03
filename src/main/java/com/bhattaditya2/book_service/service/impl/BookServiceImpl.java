@@ -14,8 +14,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class BookServiceImpl implements BookService {
@@ -34,18 +34,25 @@ public class BookServiceImpl implements BookService {
     public BookResponse fetchBookDetails(Long id) {
         Book book = fetchBook(id);
 
+        Author author = fetchAuthor(book.getAuthorId());
+
+        return new BookResponse(book, author);
+    }
+
+    public Author fetchAuthor(Long id) {
         Author author;
 
         try {
-            author = authorClient.getAuthorById(book.getAuthorId());
-        } catch (FeignException e) {
-            logger.error("Author service not reachable or author not found for authorId: {}. Using fallback dummy author.", book.getAuthorId(), e);
-
+            author = authorClient.getAuthorById(id);
+        } catch (FeignException.NotFound ex) {
             // Fallback
-           author = buildDummyAuthor();
+            author = buildDummyAuthor("Author Not found with ID: " + id);
+        } catch (FeignException e) {
+            logger.error("Author service not reachable", e);
+            // Fallback
+            author = buildDummyAuthor("Author information temporarily unavailable");
         }
-
-        return new BookResponse(book, author);
+        return author;
     }
 
     private Book fetchBook(Long id) {
@@ -54,48 +61,50 @@ public class BookServiceImpl implements BookService {
                 .orElseThrow(()-> new BookNotFoundException("Book not found ID: " + id));
     }
 
-    private Author buildDummyAuthor() {
+    private Author buildDummyAuthor(String msg) {
         Author author = new Author();
-        author.setId(0L);
+        author.setId(null);
         author.setName("Unknown Author");
-        author.setEmail("Author information temporarily unavailable");
+        author.setEmail(msg);
         author.setDob(null);
         return author;
     }
 
     @Override
-    public Book createBook(Book book) {
-        try {
-            Author author = authorClient.getAuthorById(book.getAuthorId());
-        } catch (FeignException.NotFound ex) {
-            logger.error("Author not found for authorId: {}", book.getAuthorId(), ex);
-            throw new AuthorNotFoundException("Cannot create book because Author not found with ID: " + book.getAuthorId());
-        } catch (FeignException ex) {
-            logger.error("Author service not reachable while creating book for authorId: {}", book.getAuthorId(), ex);
-            throw new RuntimeException("Author service unavailable. Please try again later.");
-        }
+    public BookResponse createBook(Book book) {
+        Author author = fetchAuthor(book.getAuthorId());
 
-        return bookRepository.save(book);
+        Book newBook = bookRepository.save(book);
+        return fetchBookDetails(newBook.getId());
+
     }
 
     @Override
     public List<BookResponse> getAllBooks() {
         List<Book> books = bookRepository.findAll();
 
-        return books.stream()
-                .map(book -> {
-                    Author author = authorClient.getAuthorById(book.getAuthorId());
-                    return new BookResponse(book, author);
-                })
-                .collect(Collectors.toList());
+        List<BookResponse> bookResponses = new ArrayList<>();
+
+        books.forEach(book -> {
+            BookResponse bookResponse = fetchBookDetails(book.getId());
+            bookResponses.add(bookResponse);
+        });
+        return bookResponses;
     }
 
     @Override
-    public Book updateBook(Long id, Book book) {
+    public BookResponse updateBook(Long id, Book book) {
+        if (book.getAuthorId() == null) {
+            logger.error("Author ID is null while updating book with ID: {}", id);
+            throw new BookServiceException("Author ID cannot be null while updating book.");
+        }
         Book existingBook = fetchBook(id);
+        logger.info("Calling author-service for authorId: {}", existingBook.getAuthorId());
 
+        Author author;
         try {
-            Author author = authorClient.getAuthorById(book.getAuthorId());
+            author = authorClient.getAuthorById(book.getAuthorId());
+            logger.info("Updating book with author: {}", author.getName());
         } catch (FeignException.NotFound ex) {
             logger.error("Author not found with ID: {} while updating book.", book.getAuthorId(), ex);
             throw new AuthorNotFoundException("Author not found with ID: " + book.getAuthorId());
@@ -104,11 +113,18 @@ public class BookServiceImpl implements BookService {
             throw new BookServiceException("Error communicating with author-service while updating book", e);
         }
 
-        existingBook.setTitle(book.getTitle());
-        existingBook.setGenre(book.getGenre());
         existingBook.setAuthorId(book.getAuthorId());
 
-        return bookRepository.save(existingBook);
+        if (book.getTitle() != null) {
+            existingBook.setTitle(book.getTitle());
+        }
+
+        if (book.getGenre() != null) {
+            existingBook.setGenre(book.getGenre());
+        }
+
+        Book updatedBook = bookRepository.save(existingBook);
+        return new BookResponse(existingBook, author);
     }
 
     @Override

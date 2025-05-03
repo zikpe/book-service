@@ -4,4 +4,7 @@ public class BookServiceException extends RuntimeException{
     public BookServiceException(String message, Exception e) {
         super(message);
     }
+
+    public BookServiceException(String message) {
+    }
 }
