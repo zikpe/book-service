@@ -1,0 +1,31 @@
+server:
+  port: 8082
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/bookdb
+    username: ${USERNAME}
+    password: ${PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+
+eureka:
+  client:
+    register-with-eureka: false
+    fetch-registry: false
+
+# api gateway
+gateway:
+  filter:
+    enabled: false
+
+logging:
+  level:
+    org.springframework.web.client.RestTemplate: INFO
+    org.springframework.web.servlet.DispatcherServlet: INFO
+    com.netflix.discovery: WARN
+    com.netflix.eureka: WARN
+    org.springframework.cloud.netflix.eureka: WARN

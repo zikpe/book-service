@@ -3,6 +3,7 @@ package com.bhattaditya2.book_service.controller;
 import com.bhattaditya2.book_service.payload.BookResponse;
 import com.bhattaditya2.book_service.entity.Book;
 import com.bhattaditya2.book_service.service.BookService;
+import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -30,7 +31,7 @@ public class BookController {
     }
 
     @PostMapping
-    public ResponseEntity<BookResponse> createBook(@RequestBody Book book) {
+    public ResponseEntity<BookResponse> createBook(@Valid @RequestBody Book book) {
         LOGGER.info("create book {}", book);
         BookResponse bookResponse= bookService.createBook(book);
         return new ResponseEntity<>(bookResponse, HttpStatus.CREATED);
@@ -43,7 +44,7 @@ public class BookController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<BookResponse> updateBook(@PathVariable Long id, @RequestBody Book book) {
+    public ResponseEntity<BookResponse> updateBook(@PathVariable Long id, @Valid @RequestBody Book book) {
         BookResponse bookResponse= bookService.updateBook(id, book);
         return ResponseEntity.ok(bookResponse);
     }
