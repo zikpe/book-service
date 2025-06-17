@@ -40,19 +40,18 @@ public class BookServiceImpl implements BookService {
     }
 
     public Author fetchAuthor(Long id) {
-        Author author;
-
         try {
-            author = authorClient.getAuthorById(id);
+            return authorClient.getAuthorById(id);
         } catch (FeignException.NotFound ex) {
-            // Fallback
-            author = buildDummyAuthor("Author Not found with ID: " + id);
+            logger.warn("Author not found with ID: {}", id);
+            return null; // Author not found — safe to proceed
+        } catch (FeignException.ServiceUnavailable | FeignException.InternalServerError e) {
+            logger.error("Author service is down: {}", e.getMessage());
+            return null; // Service down — still safe, but log clearly
         } catch (FeignException e) {
-            logger.error("Author service not reachable", e);
-            // Fallback
-            author = buildDummyAuthor("Author information temporarily unavailable");
+            logger.error("Unexpected error while calling author service", e);
+            return null;
         }
-        return author;
     }
 
     private Book fetchBook(Long id) {
@@ -61,21 +60,13 @@ public class BookServiceImpl implements BookService {
                 .orElseThrow(()-> new BookNotFoundException("Book not found ID: " + id));
     }
 
-    private Author buildDummyAuthor(String msg) {
-        Author author = new Author();
-        author.setId(null);
-        author.setName("Unknown Author");
-        author.setEmail(msg);
-        author.setDob(null);
-        return author;
-    }
-
     @Override
     public BookResponse createBook(Book book) {
         Author author = fetchAuthor(book.getAuthorId());
 
         Book newBook = bookRepository.save(book);
-        return fetchBookDetails(newBook.getId());
+
+        return new BookResponse(newBook, author);
 
     }
 
