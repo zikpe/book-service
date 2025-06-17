@@ -2,7 +2,9 @@ package com.bhattaditya2.book_service.payload;
 
 import com.bhattaditya2.book_service.entity.Author;
 import com.bhattaditya2.book_service.entity.Book;
+import lombok.Getter;
 
+@Getter
 public class BookResponse {
 
     private Book book;
@@ -17,16 +19,8 @@ public class BookResponse {
         this.author = author;
     }
 
-    public Book getBook() {
-        return book;
-    }
-
     public void setBook(Book book) {
         this.book = book;
-    }
-
-    public Author getAuthor() {
-        return author;
     }
 
     public void setAuthor(Author author) {
