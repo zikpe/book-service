@@ -1,16 +1,13 @@
-# Dockerfile - will be ignored as docker compose is not using builds
+# Use modern Java 17 base image
+FROM eclipse-temurin:22-jdk
 
-# Use lightweight OpenJDK base image
-FROM openjdk:17-jdk-slim
-
-# Set a working directory inside the container
+# Create working directory
 WORKDIR /app
 
-# Copy the JAR file into the container (adjust jar name if needed)
-COPY target/book-service-0.0.1-SNAPSHOT.jar app.jar
+# Copy jar file
+COPY target/*.jar app.jar
 
-# Expose port (matches the app's port)
-EXPOSE 8080
+EXPOSE 8083
 
-# Run the jar file
+# Run application
 ENTRYPOINT ["java", "-jar", "app.jar"]

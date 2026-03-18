@@ -1,0 +1,16 @@
+services:
+  book-service:
+    build: .
+    networks:
+      - microservices-net
+
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/bookdb
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: password
+
+networks:
+  microservices-net:
+    external: true
